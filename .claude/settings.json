@@ -4,7 +4,12 @@
       "Bash(git init)",
       "Bash(git remote add origin https://github.com/Achlat/comerce-flow.git)",
       "Bash(git fetch origin)",
-      "Bash(git add .)"
+      "Bash(git add .)",
+      "Bash(git config user.email \"tairoua698@gmail.com\")",
+      "Bash(git config user.name \"Achlat\")",
+      "Bash(git branch -M main)",
+      "Bash(git push --force -u origin main)",
+      "Bash(npm run build)"
     ]
   }
 }

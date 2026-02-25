@@ -3,9 +3,6 @@ export const getToken = () => localStorage.getItem('auth_token');
 export const setToken = (t: string) => localStorage.setItem('auth_token', t);
 export const clearToken = () => localStorage.removeItem('auth_token');
 
-// ── Base URL (utilise VITE_API_URL en production, /api en local) ──────────────
-const BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api';
-
 // ── Core fetch wrapper ────────────────────────────────────────────────────────
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
@@ -13,7 +10,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const res = await fetch(`/api${path}`, { ...options, headers });
   const json = await res.json();
   if (!res.ok) throw new Error(json.message || `Erreur ${res.status}`);
   return json;
