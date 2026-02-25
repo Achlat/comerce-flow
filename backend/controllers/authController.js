@@ -131,17 +131,67 @@ const register = async (req, res) => {
 
 /** GET /api/auth/me */
 const getMe = async (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      id: req.user.id,
-      nom: req.user.nom,
-      email: req.user.email,
-      role: req.user.role,
-      entreprise_id: req.user.entreprise_id,
-      entreprise_nom: req.user.entreprise_nom,
-    },
-  });
+  try {
+    const rows = await query(
+      `SELECT u.id, u.nom, u.email, u.role, u.entreprise_id,
+              e.nom AS entreprise_nom, e.devise
+       FROM users u
+       JOIN entreprises e ON u.entreprise_id = e.id
+       WHERE u.id = ?`,
+      [req.user.id]
+    );
+    if (rows.length === 0) return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
+    const u = rows[0];
+    res.json({
+      success: true,
+      data: {
+        id: u.id, nom: u.nom, email: u.email, role: u.role,
+        entreprise_id: u.entreprise_id, entreprise_nom: u.entreprise_nom, devise: u.devise,
+      },
+    });
+  } catch (err) {
+    console.error('[AUTH] getMe:', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+};
+
+/** PUT /api/auth/profile */
+const updateProfile = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+    const { nom, email } = req.body;
+    const existing = await query('SELECT id FROM users WHERE email = ? AND id != ?', [email, req.user.id]);
+    if (existing.length > 0) {
+      return res.status(409).json({ success: false, message: 'Cet email est déjà utilisé' });
+    }
+    await query('UPDATE users SET nom = ?, email = ? WHERE id = ?', [nom, email, req.user.id]);
+    res.json({ success: true, message: 'Profil mis à jour' });
+  } catch (err) {
+    console.error('[AUTH] updateProfile:', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+};
+
+/** PUT /api/auth/entreprise */
+const updateEntreprise = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+    const { nom, devise } = req.body;
+    await query(
+      'UPDATE entreprises SET nom = ?, devise = ? WHERE id = ?',
+      [nom, devise || 'FCFA', req.user.entreprise_id]
+    );
+    res.json({ success: true, message: 'Entreprise mise à jour' });
+  } catch (err) {
+    console.error('[AUTH] updateEntreprise:', err);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
 };
 
 /** PUT /api/auth/change-password */
@@ -242,4 +292,4 @@ const updateUser = async (req, res) => {
   }
 };
 
-module.exports = { login, register, getMe, changePassword, createUser, getUsers, updateUser };
+module.exports = { login, register, getMe, updateProfile, updateEntreprise, changePassword, createUser, getUsers, updateUser };

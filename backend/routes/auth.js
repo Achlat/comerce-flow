@@ -4,7 +4,7 @@ const { body } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/permissions');
 const {
-  login, register, getMe, changePassword,
+  login, register, getMe, updateProfile, updateEntreprise, changePassword,
   createUser, getUsers, updateUser,
 } = require('../controllers/authController');
 
@@ -24,6 +24,18 @@ router.post('/register', [
 
 // GET /api/auth/me
 router.get('/me', authenticate, getMe);
+
+// PUT /api/auth/profile
+router.put('/profile', authenticate, [
+  body('nom').trim().notEmpty().withMessage('Nom requis'),
+  body('email').isEmail().withMessage('Email invalide').normalizeEmail(),
+], updateProfile);
+
+// PUT /api/auth/entreprise  (admin)
+router.put('/entreprise', authenticate, requireAdmin, [
+  body('nom').trim().notEmpty().withMessage('Nom entreprise requis'),
+  body('devise').optional().trim(),
+], updateEntreprise);
 
 // PUT /api/auth/change-password
 router.put('/change-password', authenticate, [

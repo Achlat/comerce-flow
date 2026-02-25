@@ -68,6 +68,7 @@ export interface ApiUser {
   role: string;
   entreprise_id: number;
   entreprise_nom: string;
+  devise: string;
 }
 
 export const authApi = {
@@ -77,6 +78,21 @@ export const authApi = {
       body: JSON.stringify({ email, password }),
     }),
   me: () => request<{ success: boolean; data: ApiUser }>('/auth/me'),
+  updateProfile: (nom: string, email: string) =>
+    request<{ success: boolean; message: string }>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ nom, email }),
+    }),
+  updateEntreprise: (nom: string, devise: string) =>
+    request<{ success: boolean; message: string }>('/auth/entreprise', {
+      method: 'PUT',
+      body: JSON.stringify({ nom, devise }),
+    }),
+  changePassword: (ancien_mot_de_passe: string, nouveau_mot_de_passe: string) =>
+    request<{ success: boolean; message: string }>('/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({ ancien_mot_de_passe, nouveau_mot_de_passe }),
+    }),
 };
 
 // ── CLIENTS ───────────────────────────────────────────────────────────────────

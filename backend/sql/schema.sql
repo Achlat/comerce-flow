@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS entreprises (
   telephone VARCHAR(20) DEFAULT NULL,
   adresse TEXT DEFAULT NULL,
   logo VARCHAR(500) DEFAULT NULL,
+  devise VARCHAR(20) NOT NULL DEFAULT 'FCFA',
   plan VARCHAR(50) NOT NULL DEFAULT 'basic',
   actif TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -238,6 +239,9 @@ JOIN users u ON i.user_id = u.id
 JOIN entreprises e ON i.entreprise_id = e.id
 LEFT JOIN fournisseurs f ON i.fournisseur_id = f.id
 LEFT JOIN clients c ON i.client_id = c.id;
+
+-- Ajouter devise si la colonne n'existe pas encore (migration)
+ALTER TABLE entreprises ADD COLUMN IF NOT EXISTS devise VARCHAR(20) NOT NULL DEFAULT 'FCFA';
 
 -- ============================================================
 -- DONNÉES DE DÉMARRAGE

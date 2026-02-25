@@ -5,6 +5,7 @@ export interface User {
   role: 'admin' | 'employee';
   companyId: string;
   companyName: string;
+  devise: string;
 }
 
 export interface Product {
